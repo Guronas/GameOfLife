@@ -24,19 +24,14 @@
 
 package com.maksofrol.gameoflife;
 
+import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Shell;
+
 import javax.swing.*;
 
 /**
  * TO DO
  */
-public class FieldFrame extends JFrame {
-
-    FieldFrame() {
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Game of Life");
-        setContentPane(new FieldPanel());
-        setSize(1024, 1024);
-        setResizable(false);
-        setLocationRelativeTo(null);
-    }
+public class FieldShell extends Shell {
+    Display fieldDisplay;
 }

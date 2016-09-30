@@ -24,10 +24,12 @@
 
 package com.maksofrol.gameoflife;
 
+import org.eclipse.swt.widgets.Display;
+
 import javax.swing.*;
 
 /**
  * TO DO
  */
-public class FieldPanel extends JPanel {
+public class FieldDisplay extends Display {
 }
