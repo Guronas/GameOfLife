@@ -22,16 +22,49 @@
  * SOFTWARE.
  */
 
-package com.maksofrol.gameoflife;
+package com.maksofrol.gameoflife.form;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.internal.gdip.PointF;
+import org.eclipse.swt.internal.win32.POINT;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.widgets.Shell;
-
-import javax.swing.*;
 
 /**
  * TO DO
  */
-public class FieldShell extends Shell {
-    Display fieldDisplay;
+public class FieldForm {
+
+    private final Display fieldDisplay = new Display();
+    private final Shell fieldShell = new Shell(fieldDisplay, SWT.CLOSE | SWT.TITLE);
+    private final Button start = new Button(fieldShell, SWT.PUSH);
+    private final Button exit = new Button(fieldShell, SWT.PUSH);
+
+    public FieldForm() {
+    }
+
+    public void init() {
+        fieldShell.setText("Game of Life");
+        fieldShell.setSize(1300, 1024);
+        fieldShell.setLocation(0, 0);
+
+        start.setText("Start game!");
+        start.setSize(100, 30);
+        start.setLocation(1100, 100);
+        exit.setText("Exit");
+        exit.setSize(100, 30);
+        exit.setLocation(1100, 150);
+
+        fieldShell.open();
+
+        while (!fieldShell.isDisposed()) {
+            if (!fieldDisplay.readAndDispatch()) {
+                fieldDisplay.sleep();
+            }
+        }
+
+        fieldDisplay.dispose();
+    }
+
 }
