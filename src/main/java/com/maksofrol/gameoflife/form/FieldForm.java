@@ -25,36 +25,54 @@
 package com.maksofrol.gameoflife.form;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.internal.gdip.PointF;
-import org.eclipse.swt.internal.win32.POINT;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
 /**
  * TO DO
  */
+/* TODO
+Перевести проект на стримы.
+ */
 public class FieldForm {
 
     private final Display fieldDisplay = new Display();
     private final Shell fieldShell = new Shell(fieldDisplay, SWT.CLOSE | SWT.TITLE);
-    private final Button start = new Button(fieldShell, SWT.PUSH);
-    private final Button exit = new Button(fieldShell, SWT.PUSH);
+    private final Composite field = new Composite(fieldShell, SWT.BORDER);
+    private final Composite menu = new Composite(fieldShell, SWT.BORDER);
+    private final Button addB = new Button(menu, SWT.PUSH);
+    private final Button startB = new Button(menu, SWT.PUSH);
+    private final Button exitB = new Button(menu, SWT.PUSH);
+    private final Text xCoordinate = new Text(menu, SWT.SINGLE);
+    private final Text yCoordinate = new Text(menu, SWT.SINGLE);
 
     public FieldForm() {
     }
 
     public void init() {
         fieldShell.setText("Game of Life");
-        fieldShell.setSize(1300, 1024);
+        fieldShell.setSize(1200, 1040);
         fieldShell.setLocation(0, 0);
 
-        start.setText("Start game!");
-        start.setSize(100, 30);
-        start.setLocation(1100, 100);
-        exit.setText("Exit");
-        exit.setSize(100, 30);
-        exit.setLocation(1100, 150);
+        field.setSize(1000, 1000);
+        field.setLocation(5, 5);
+
+        menu.setSize(200, 1000);
+        menu.setLocation(1010, 5);
+
+        xCoordinate.setSize(50, 20);
+        xCoordinate.setLocation(30,70);
+        yCoordinate.setSize(50, 20);
+        yCoordinate.setLocation(100,70);
+
+        addB.setText("Add cell");
+        addB.setSize(120, 30);
+        addB.setLocation(30, 100);
+        startB.setText("Start game!");
+        startB.setSize(120, 40);
+        startB.setLocation(30, 200);
+        exitB.setText("Exit");
+        exitB.setSize(120, 40);
+        exitB.setLocation(30, 800);
 
         fieldShell.open();
 
