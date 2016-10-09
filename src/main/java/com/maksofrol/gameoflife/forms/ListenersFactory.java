@@ -27,10 +27,7 @@ package com.maksofrol.gameoflife.forms;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 
 /**
  * TO DO
@@ -46,7 +43,7 @@ public class ListenersFactory {
     }
 
     public Listener getDrawCellListener(Canvas field, Image cell, Text x, Text y) {
-        return e -> {
+        return event -> {
             String xText = x.getText();
             String yText = y.getText();
             if (xText.equals("") || yText.equals("") || Integer.parseInt(xText) > 1000 || Integer.parseInt(yText) > 1000) {
@@ -64,9 +61,25 @@ public class ListenersFactory {
         };
     }
 
-    public Listener getClearFieldListener(Canvas field){
+    public Listener getClearFieldListener(Canvas field) {
         return event -> {
             field.redraw();
+        };
+    }
+
+    public Listener getStartListener(Control... ctrls) {
+        return event -> {
+            for (Control ctrl : ctrls) {
+                ctrl.setEnabled(false);
+            }
+        };
+    }
+
+    public Listener getStopListener(Control... ctrls) {
+        return event -> {
+            for (Control ctrl : ctrls) {
+                ctrl.setEnabled(true);
+            }
         };
     }
 

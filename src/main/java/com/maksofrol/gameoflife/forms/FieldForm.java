@@ -24,6 +24,7 @@
 
 package com.maksofrol.gameoflife.forms;
 
+import com.maksofrol.gameoflife.controller.LifeController;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -42,7 +43,24 @@ import java.awt.*;
 /* TODO
 Перевести проект на стримы.
  */
-public class FieldForm{
+public class FieldForm {
+
+    private static volatile FieldForm instance;
+
+    public static FieldForm getInstance() {
+        FieldForm localInstance = instance;
+        if (localInstance == null) {
+            synchronized (FieldForm.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new FieldForm();
+                }
+            }
+        }
+        return localInstance;
+    }
+
+    private FieldForm(){}
 
     private final Display fieldDisplay = new Display();
     private final Shell fieldShell = new Shell(fieldDisplay, SWT.CLOSE | SWT.TITLE);
@@ -63,8 +81,7 @@ public class FieldForm{
     private ListenersFactory factory = new ListenersFactory();
     private final Image cell = new Image(fieldDisplay, new ImageData("cell.png"));
 
-    public FieldForm() {
-    }
+    private final LifeController controller = LifeController.getInstance();
 
     public void init() {
         fieldShell.setText("Game of Life");
@@ -73,7 +90,7 @@ public class FieldForm{
 
         field.setSize(1006, 1006);
         field.setLocation(0, 0);
-        field.setBackground(new Color(null,255,255,255));
+        field.setBackground(new Color(null, 255, 255, 255));
 
         menu.setSize(180, 1000);
         menu.setLocation(1010, 5);
@@ -95,13 +112,16 @@ public class FieldForm{
         addB.setSize(120, 30);
         addB.setLocation(30, 120);
         addB.addListener(SWT.MouseDown, factory.getDrawCellListener(field, cell, xCellC, yCellC));
-        clearB.setText("Clear");
+        clearB.setText("Clear field");
         clearB.setSize(120, 40);
         clearB.setLocation(30, 170);
+        clearB.addListener(SWT.MouseDown, factory.getClearFieldListener(field));
 
+        Control[] disAfterStart = new Control[] {xCellC, yCellC, addB, clearB, startB};
         startB.setText("Start game!");
         startB.setSize(120, 40);
         startB.setLocation(30, 300);
+        startB.addListener(SWT.MouseDown, factory.getStartListener(disAfterStart));
         exitB.setText("Exit");
         exitB.setSize(120, 40);
         exitB.setLocation(30, 800);
@@ -109,6 +129,7 @@ public class FieldForm{
         stopB.setText("Stop");
         stopB.setSize(120, 40);
         stopB.setLocation(30, 350);
+        stopB.addListener(SWT.MouseDown, factory.getStopListener(disAfterStart));
 
         fieldShell.open();
 

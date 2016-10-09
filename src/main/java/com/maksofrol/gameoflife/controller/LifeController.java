@@ -22,7 +22,10 @@
  * SOFTWARE.
  */
 
-package com.maksofrol.gameoflife;
+package com.maksofrol.gameoflife.controller;
+
+import com.maksofrol.gameoflife.components.Cell;
+import com.maksofrol.gameoflife.forms.FieldForm;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,10 +35,27 @@ import java.util.Set;
  * TO DO
  */
 public class LifeController {
-    public static final Set<Cell> LIVING_CELLS = new HashSet<>();
 
-    LifeController(Cell... cells) {
+    private static volatile LifeController instance;
+
+    public static LifeController getInstance() {
+        LifeController localInstance = instance;
+        if (localInstance == null) {
+            synchronized (LifeController.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new LifeController();
+                }
+            }
+        }
+        return localInstance;
     }
+
+    private LifeController(){}
+
+    private final FieldForm form = FieldForm.getInstance();
+
+    public static final Set<Cell> LIVING_CELLS = new HashSet<>();
 
     public void addCells(Cell... cells) {
         Collections.addAll(LIVING_CELLS, cells);

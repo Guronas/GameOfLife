@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.maksofrol.gameoflife;
+package com.maksofrol.gameoflife.components;
 
 import java.awt.*;
 import java.util.ArrayList;
