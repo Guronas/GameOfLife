@@ -45,23 +45,6 @@ import java.awt.*;
  */
 public class FieldForm {
 
-    private static volatile FieldForm instance;
-
-    public static FieldForm getInstance() {
-        FieldForm localInstance = instance;
-        if (localInstance == null) {
-            synchronized (FieldForm.class) {
-                localInstance = instance;
-                if (localInstance == null) {
-                    instance = localInstance = new FieldForm();
-                }
-            }
-        }
-        return localInstance;
-    }
-
-    private FieldForm(){}
-
     private final Display fieldDisplay = new Display();
     private final Shell fieldShell = new Shell(fieldDisplay, SWT.CLOSE | SWT.TITLE);
     private final Canvas field = new Canvas(fieldShell, SWT.BORDER);
@@ -81,7 +64,9 @@ public class FieldForm {
     private ListenersFactory factory = new ListenersFactory();
     private final Image cell = new Image(fieldDisplay, new ImageData("cell.png"));
 
-    private final LifeController controller = LifeController.getInstance();
+    private final LifeController controller = new LifeController(this);
+
+    public FieldForm(){}
 
     public void init() {
         fieldShell.setText("Game of Life");
@@ -97,11 +82,11 @@ public class FieldForm {
 
         xCellC.setSize(50, 20);
         xCellC.setLocation(30, 90);
-        xCellC.setTextLimit(4);
+        xCellC.setTextLimit(3);
         xCellC.addVerifyListener(factory.getVerifyTextListener());
         yCellC.setSize(50, 20);
         yCellC.setLocation(95, 90);
-        yCellC.setTextLimit(4);
+        yCellC.setTextLimit(3);
         yCellC.addVerifyListener(factory.getVerifyTextListener());
 
         xyLabel.setSize(100, 20);
@@ -111,7 +96,7 @@ public class FieldForm {
         addB.setText("Add cell");
         addB.setSize(120, 30);
         addB.setLocation(30, 120);
-        addB.addListener(SWT.MouseDown, factory.getDrawCellListener(field, cell, xCellC, yCellC));
+        addB.addListener(SWT.MouseDown, factory.getAddCellListener(controller, field, cell, xCellC, yCellC));
         clearB.setText("Clear field");
         clearB.setSize(120, 40);
         clearB.setLocation(30, 170);
@@ -121,7 +106,7 @@ public class FieldForm {
         startB.setText("Start game!");
         startB.setSize(120, 40);
         startB.setLocation(30, 300);
-        startB.addListener(SWT.MouseDown, factory.getStartListener(disAfterStart));
+        startB.addListener(SWT.MouseDown, factory.getStartListener(controller, disAfterStart));
         exitB.setText("Exit");
         exitB.setSize(120, 40);
         exitB.setLocation(30, 800);

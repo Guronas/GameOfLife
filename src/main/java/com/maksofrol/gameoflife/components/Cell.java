@@ -24,56 +24,64 @@
 
 package com.maksofrol.gameoflife.components;
 
-import java.awt.*;
-import java.util.ArrayList;
-
 /**
  * TO DO
  */
 
 public class Cell implements Runnable {
-    private final Point coordinate;
-    private final ArrayList<Cell> neighbors = new ArrayList<>();
+    private final int xCoordinate;
+    private final int yCoordinate;
     private boolean livingState;
+    private boolean active;
+    private final int[] neighborsIndex = new int[8];
 
-    Cell(Point coordinate, boolean livingState) {
-        this.coordinate = coordinate;
+    public Cell(int x, int y, boolean livingState) {
+        this.xCoordinate = x;
+        this.yCoordinate = y;
         this.livingState = livingState;
-        if (livingState) {
-            for (int x = -1; x <= 1; x++) {
-                for (int y = -1; y <= 1; y++)
-                    neighbors.add(new Cell(new Point(x, y)));
+
+        for (int i = x - 1, index = 0; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (!(i == x && j == y)) {
+                    neighborsIndex[index] = i * 501 + j;
+                    index++;
+                }
             }
         }
     }
 
-    public Cell(Point coordinate) {
-        this.coordinate = coordinate;
-    }
-
-    private void checkItLiving() {
-        int livingNeighborsCount = 0;
-        if (!livingState) {
-
-        }
-        for (Cell neighbor : neighbors) {
-            if (neighbor.itsLiving()) {
-                livingNeighborsCount++;
-            }
-            if (!livingState && livingNeighborsCount == 3) {
-                livingState = true;
-                break;
-            }
-        }
-
-        if (!(livingNeighborsCount == 2 || livingNeighborsCount == 3)) ;
-    }
-
-    private boolean itsLiving() {
+    public boolean isAlive() {
         return livingState;
     }
 
+    public void setLivingState(boolean state) {
+        livingState = state;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public int[] getNeighborsIndex(){
+        return neighborsIndex;
+    }
+
     public void run() {
-        checkItLiving();
+    }
+
+    @Override
+    public int hashCode() {
+        int p = 31765;
+        int q = 31764;
+        return (p * xCoordinate) + (q * yCoordinate);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Cell && this.hashCode() == obj.hashCode();
     }
 }

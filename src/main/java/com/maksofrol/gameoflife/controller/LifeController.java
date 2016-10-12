@@ -26,38 +26,64 @@ package com.maksofrol.gameoflife.controller;
 
 import com.maksofrol.gameoflife.components.Cell;
 import com.maksofrol.gameoflife.forms.FieldForm;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Canvas;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * TO DO
  */
 public class LifeController {
 
-    private static volatile LifeController instance;
+    private FieldForm form;
 
-    public static LifeController getInstance() {
-        LifeController localInstance = instance;
-        if (localInstance == null) {
-            synchronized (LifeController.class) {
-                localInstance = instance;
-                if (localInstance == null) {
-                    instance = localInstance = new LifeController();
-                }
+    private final Cell[] cells = new Cell[251_001];
+    private BlockingQueue<Cell> activeCells = new LinkedBlockingDeque<>();
+
+    public LifeController(FieldForm form) {
+        this.form = form;
+
+        for (int i = 0, index = 0; i <= 500; i++) {
+            for (int j = 0; j <= 500; j++, index++) {
+                cells[index] = new Cell(i, j, false);
             }
         }
-        return localInstance;
     }
 
-    private LifeController(){}
+    public void addAliveCell(Canvas field, Image cell, int x, int y) {
+        try {
+            int index = x * 501 + y;
+            Cell mainCell = cells[index];
+            if (!mainCell.isAlive()) {
+                mainCell.setLivingState(true);
 
-    private final FieldForm form = FieldForm.getInstance();
+                if (!mainCell.isActive()) {
+                    mainCell.setActive(true);
+                    activeCells.add(mainCell);
+                }
+                for (int neighborIndex : mainCell.getNeighborsIndex()) {
+                    if (!cells[neighborIndex].isActive()) {
+                        cells[neighborIndex].setActive(true);
+                        activeCells.add(cells[neighborIndex]);
+                    }
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("lool");
+        }
 
-    public static final Set<Cell> LIVING_CELLS = new HashSet<>();
+        drawCell(field, cell, x, y);
+    }
 
-    public void addCells(Cell... cells) {
-        Collections.addAll(LIVING_CELLS, cells);
+    public void drawCell(Canvas field, Image cell, int x, int y) {
+        GC gc = new GC(field);
+        gc.drawImage(cell, x * 2, y * 2);
+    }
+
+    public void checkAndRedraw() {
+
     }
 }

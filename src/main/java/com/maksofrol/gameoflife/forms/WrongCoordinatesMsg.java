@@ -62,7 +62,7 @@ public class WrongCoordinatesMsg implements Runnable {
                 fontData.setHeight(12);
                 final Font font = new Font(msgdDisplay, fontData);
 
-                xyLabel.setText("Wrong parameters. Please choose coordinates from 0 to 1000.");
+                xyLabel.setText("Wrong parameters. Please choose coordinates from 0 to 500.");
                 xyLabel.setSize(500, 100);
                 xyLabel.setLocation(80, 50);
                 xyLabel.setFont(font);

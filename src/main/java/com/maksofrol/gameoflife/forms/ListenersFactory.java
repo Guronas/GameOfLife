@@ -24,8 +24,8 @@
 
 package com.maksofrol.gameoflife.forms;
 
+import com.maksofrol.gameoflife.controller.LifeController;
 import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
 
@@ -42,16 +42,16 @@ public class ListenersFactory {
         };
     }
 
-    public Listener getDrawCellListener(Canvas field, Image cell, Text x, Text y) {
+    public Listener getAddCellListener(LifeController controller, Canvas field, Image cell, Text x, Text y) {
         return event -> {
             String xText = x.getText();
             String yText = y.getText();
-            if (xText.equals("") || yText.equals("") || Integer.parseInt(xText) > 1000 || Integer.parseInt(yText) > 1000) {
+            if (xText.equals("") || yText.equals("") || Integer.parseInt(xText) > 500 || Integer.parseInt(yText) > 500) {
                 new Thread(new WrongCoordinatesMsg()).start();
                 return;
             }
-            GC gc = new GC(field);
-            gc.drawImage(cell, Integer.parseInt(xText), Integer.parseInt(yText));
+
+            controller.addAliveCell(field, cell, Integer.parseInt(x.getText()), Integer.parseInt(y.getText()));
         };
     }
 
@@ -67,11 +67,12 @@ public class ListenersFactory {
         };
     }
 
-    public Listener getStartListener(Control... ctrls) {
+    public Listener getStartListener(LifeController controller, Control... ctrls) {
         return event -> {
             for (Control ctrl : ctrls) {
                 ctrl.setEnabled(false);
             }
+
         };
     }
 
