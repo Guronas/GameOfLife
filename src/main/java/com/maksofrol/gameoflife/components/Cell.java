@@ -24,30 +24,47 @@
 
 package com.maksofrol.gameoflife.components;
 
+import com.maksofrol.gameoflife.controller.LifeController;
+
+import java.util.concurrent.Callable;
+
 /**
  * TO DO
  */
 
-public class Cell implements Runnable {
+public class Cell implements Callable<Boolean>, Cloneable {
     private final int xCoordinate;
     private final int yCoordinate;
     private boolean livingState;
     private boolean active;
-    private final int[] neighborsIndex = new int[8];
+    private final Cell[] neighbors = new Cell[8];
+    private final LifeController controller;
 
-    public Cell(int x, int y, boolean livingState) {
+    public Cell(int x, int y, LifeController controller) {
         this.xCoordinate = x;
         this.yCoordinate = y;
-        this.livingState = livingState;
+        this.controller = controller;
+    }
 
-        for (int i = x - 1, index = 0; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                if (!(i == x && j == y)) {
-                    neighborsIndex[index] = i * 501 + j;
+    public void setNeighbors() {
+        for (int i = xCoordinate - 1, index = 0; i <= xCoordinate + 1; i++) {
+            int iX = checkBorders(i);
+            for (int j = yCoordinate - 1; j <= yCoordinate + 1; j++) {
+                int jX = checkBorders(j);
+                if (!(i == xCoordinate && j == yCoordinate)) {
+                    neighbors[index] = controller.getCells()[iX * 501 + jX];
                     index++;
                 }
             }
         }
+    }
+
+    public int getXCoordinate() {
+        return xCoordinate;
+    }
+
+    public int getYCoordinate(){
+        return yCoordinate;
     }
 
     public boolean isAlive() {
@@ -66,11 +83,44 @@ public class Cell implements Runnable {
         this.active = active;
     }
 
-    public int[] getNeighborsIndex(){
-        return neighborsIndex;
+    public Cell[] getNeighbors() {
+        return neighbors;
     }
 
-    public void run() {
+    public Boolean call() {
+        Cell clone;
+        try {
+            clone = clone();
+            int neighborAliveCount = 0;
+            for (Cell neighbor : neighbors) {
+                if (neighbor.isAlive()) neighborAliveCount++;
+                if (neighborAliveCount == 4) break;
+            }
+            if (isAlive() && (neighborAliveCount < 2 || neighborAliveCount > 3)) {
+                clone.setLivingState(false);
+            } else if (!isAlive() && neighborAliveCount == 3){
+                clone.setLivingState(true);
+            }
+            controller.getTempActiveCells().add(clone);
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    private int checkBorders(int n) {
+        if (n == -1) {
+            return 500;
+        } else if (n == 501) {
+            return 0;
+        }
+        return n;
+    }
+
+    @Override
+    public Cell clone() throws CloneNotSupportedException{
+        Cell clone = (Cell) super.clone();
+        return clone;
     }
 
     @Override

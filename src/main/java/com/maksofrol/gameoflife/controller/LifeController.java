@@ -25,32 +25,68 @@
 package com.maksofrol.gameoflife.controller;
 
 import com.maksofrol.gameoflife.components.Cell;
-import com.maksofrol.gameoflife.forms.FieldForm;
+import com.maksofrol.gameoflife.forms.FieldFrame;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Canvas;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * TO DO
  */
 public class LifeController {
 
-    private FieldForm form;
+    private FieldFrame form;
+    public static final int INIT_STATUS = 0;
+    public static final int STARTED_STATUS = 1;
+    public static final int STOPPED_STATUS = 2;
+    public static final int REDRAWED_STATUS = 3;
+    private int status;
+
 
     private final Cell[] cells = new Cell[251_001];
-    private BlockingQueue<Cell> activeCells = new LinkedBlockingDeque<>();
+    private final CopyOnWriteArrayList<Cell> activeCells = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<Cell> tempActiveCells = new CopyOnWriteArrayList<>();
+    private final ExecutorService evalExecutor;
+    private final ExecutorService drawExecutor;
 
-    public LifeController(FieldForm form) {
+    public LifeController(FieldFrame form) {
         this.form = form;
 
         for (int i = 0, index = 0; i <= 500; i++) {
             for (int j = 0; j <= 500; j++, index++) {
-                cells[index] = new Cell(i, j, false);
+                cells[index] = new Cell(i, j, this);
             }
         }
+        for (Cell cell : cells) {
+            cell.setNeighbors();
+        }
+
+        evalExecutor = new ThreadPoolExecutor(50, 200, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        drawExecutor = new ThreadPoolExecutor(5, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        status = INIT_STATUS;
+    }
+
+    public CopyOnWriteArrayList<Cell> getActiveCells() {
+        return activeCells;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Cell[] getCells() {
+        return cells;
+    }
+
+    public List<Cell> getTempActiveCells() {
+        return tempActiveCells;
     }
 
     public void addAliveCell(Canvas field, Image cell, int x, int y) {
@@ -64,18 +100,25 @@ public class LifeController {
                     mainCell.setActive(true);
                     activeCells.add(mainCell);
                 }
-                for (int neighborIndex : mainCell.getNeighborsIndex()) {
-                    if (!cells[neighborIndex].isActive()) {
-                        cells[neighborIndex].setActive(true);
-                        activeCells.add(cells[neighborIndex]);
+                for (Cell neighbor : mainCell.getNeighbors()) {
+                    if (!neighbor.isActive()) {
+                        neighbor.setActive(true);
+                        activeCells.add(neighbor);
                     }
                 }
+                drawCell(field, cell, x, y);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("lool");
         }
+    }
 
-        drawCell(field, cell, x, y);
+    public void clearActiveCells() {
+        activeCells.forEach(cell -> {
+            cell.setActive(false);
+            cell.setLivingState(false);
+        });
+        activeCells.clear();
     }
 
     public void drawCell(Canvas field, Image cell, int x, int y) {
@@ -83,7 +126,9 @@ public class LifeController {
         gc.drawImage(cell, x * 2, y * 2);
     }
 
-    public void checkAndRedraw() {
-
+    public void checkAndRedraw() throws InterruptedException {
+        evalExecutor.invokeAll(activeCells);
+        activeCells.clear();
+        activeCells.addAll(tempActiveCells);
     }
 }
