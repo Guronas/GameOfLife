@@ -26,9 +26,6 @@ package com.maksofrol.gameoflife.controller;
 
 import com.maksofrol.gameoflife.components.Cell;
 import com.maksofrol.gameoflife.forms.FieldFrame;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Canvas;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -37,6 +34,7 @@ import java.util.concurrent.*;
  * TO DO
  */
 public class LifeController {
+    private static volatile LifeController instance;
 
     private FieldFrame form;
     public static final int INIT_STATUS = 0;
@@ -52,9 +50,7 @@ public class LifeController {
     private final ExecutorService evalExecutor;
     private final ExecutorService drawExecutor;
 
-    public LifeController(FieldFrame form) {
-        this.form = form;
-
+    private LifeController() {
         for (int i = 0, index = 0; i <= 500; i++) {
             for (int j = 0; j <= 500; j++, index++) {
                 cells[index] = new Cell(i, j, this);
@@ -67,6 +63,21 @@ public class LifeController {
         evalExecutor = new ThreadPoolExecutor(50, 200, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         drawExecutor = new ThreadPoolExecutor(5, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         status = INIT_STATUS;
+
+        instance = this;
+    }
+
+    public static LifeController getInstance(){
+        LifeController localInstance = instance;
+        if (localInstance == null) {
+            synchronized (LifeController.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new LifeController();
+                }
+            }
+        }
+        return localInstance;
     }
 
     public CopyOnWriteArrayList<Cell> getActiveCells() {
@@ -89,7 +100,7 @@ public class LifeController {
         return tempActiveCells;
     }
 
-    public void addAliveCell(Canvas field, Image cell, int x, int y) {
+    public void addAliveCell(int x, int y) {
         try {
             int index = x * 501 + y;
             Cell mainCell = cells[index];
@@ -106,7 +117,6 @@ public class LifeController {
                         activeCells.add(neighbor);
                     }
                 }
-                drawCell(field, cell, x, y);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("lool");
@@ -119,11 +129,6 @@ public class LifeController {
             cell.setLivingState(false);
         });
         activeCells.clear();
-    }
-
-    public void drawCell(Canvas field, Image cell, int x, int y) {
-        GC gc = new GC(field);
-        gc.drawImage(cell, x * 2, y * 2);
     }
 
     public void checkAndRedraw() throws InterruptedException {

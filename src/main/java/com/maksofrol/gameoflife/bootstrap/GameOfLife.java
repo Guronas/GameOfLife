@@ -33,11 +33,6 @@ import java.awt.*;
  */
 public class GameOfLife {
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new FieldFrame().startGame();
-            }
-        });
+        EventQueue.invokeLater(() -> new FieldFrame().startGame());
 }
 }

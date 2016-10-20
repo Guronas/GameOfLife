@@ -43,7 +43,7 @@ public class FieldFrame extends JFrame {
         }
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("Game of life");
-        setContentPane(new FieldPanel());
+        setContentPane(new FieldPanel(this));
         setSize(1202, 1010);
         setResizable(false);
         setLocationRelativeTo(null);
