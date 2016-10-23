@@ -32,6 +32,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 /**
  * TO DO
@@ -50,6 +53,7 @@ public class FieldPanel extends JPanel {
     private final ListenersFactory factory = new ListenersFactory();
     private final LifeController controller;
     private final Timer startGame;
+    private final JLabel version;
 
     public FieldPanel(JFrame rootFrame) {
         controller = LifeController.getInstance();
@@ -91,7 +95,13 @@ public class FieldPanel extends JPanel {
         xyLabel.setFont(new Font("Verdana", Font.PLAIN, 12));
         xyLabel.setText("X:          Y:");
 
-        startGame = new Timer(50, factory.getTimerListener());
+        version = new JLabel();
+        version.setText("version 0.3.0");
+        version.setBounds(1100, 950, 100, 50);
+        version.setFont(new Font("Verdana", Font.PLAIN, 10));
+        version.setEnabled(false);
+
+        startGame = new Timer(150, factory.getTimerListener());
 
         init();
     }
@@ -119,6 +129,7 @@ public class FieldPanel extends JPanel {
         add(xText);
         add(yText);
         add(xyLabel);
+        add(version);
 
         textLimit(xText, 3, "1234567890");
         textLimit(yText, 3, "1234567890");
@@ -129,11 +140,13 @@ public class FieldPanel extends JPanel {
         clearB.addActionListener(factory.getClearFListener());
         startB.addActionListener(factory.getStartListener());
         stopB.addActionListener(factory.getStopListener());
+        field.addMouseListener(factory.getTouchListener());
+        field.addMouseMotionListener(factory.getMouseMListener());
     }
 
     private class ListenersFactory {
 
-        private  ActionListener getTimerListener(){
+        private ActionListener getTimerListener() {
             return e -> {
                 try {
                     controller.checkAndRedraw();
@@ -191,6 +204,55 @@ public class FieldPanel extends JPanel {
                 clearB.setEnabled(true);
                 stopB.setEnabled(false);
                 startB.setEnabled(true);
+            };
+        }
+
+        private MouseMotionListener getMouseMListener() {
+            return new MouseMotionListener() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    int x = e.getX() / 2 - 1;
+                    int y = e.getY() / 2 - 1;
+                    controller.addAliveCell(x, y);
+                    field.repaint();
+                }
+
+                @Override
+                public void mouseMoved(MouseEvent e) {
+
+                }
+            };
+        }
+
+        private MouseListener getTouchListener() {
+            return new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    int x = e.getX() / 2 - 1;
+                    int y = e.getY() / 2 - 1;
+                    controller.addAliveCell(x, y);
+                    field.repaint();
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+
+                }
             };
         }
     }
