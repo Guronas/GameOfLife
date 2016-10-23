@@ -93,16 +93,6 @@ public class FieldPanel extends JPanel {
 
         startGame = new Timer(50, factory.getTimerListener());
 
-        add(field);
-        add(addB);
-        add(clearB);
-        add(startB);
-        add(stopB);
-        add(exitB);
-        add(xText);
-        add(yText);
-        add(xyLabel);
-
         init();
     }
 
@@ -120,6 +110,16 @@ public class FieldPanel extends JPanel {
     }
 
     private void init() {
+        add(field);
+        add(addB);
+        add(clearB);
+        add(startB);
+        add(stopB);
+        add(exitB);
+        add(xText);
+        add(yText);
+        add(xyLabel);
+
         textLimit(xText, 3, "1234567890");
         textLimit(yText, 3, "1234567890");
         stopB.setEnabled(false);

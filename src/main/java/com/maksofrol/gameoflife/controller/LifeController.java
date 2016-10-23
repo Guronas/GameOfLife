@@ -82,25 +82,21 @@ public class LifeController {
     }
 
     public void addAliveCell(int x, int y) {
-        try {
-            int index = x * 501 + y;
-            Cell mainCell = cells[index];
-            if (!mainCell.isAlive()) {
-                mainCell.setLivingState(true);
+        int index = x * 501 + y;
+        Cell mainCell = cells[index];
+        if (!mainCell.isAlive()) {
+            mainCell.setLivingState(true);
 
-                if (!mainCell.isActive()) {
-                    mainCell.setActive(true);
-                    activeCells.add(mainCell);
-                }
-                for (Cell neighbor : mainCell.getNeighbors()) {
-                    if (!neighbor.isActive()) {
-                        neighbor.setActive(true);
-                        activeCells.add(neighbor);
-                    }
+            if (!mainCell.isActive()) {
+                mainCell.setActive(true);
+                activeCells.add(mainCell);
+            }
+            for (Cell neighbor : mainCell.getNeighbors()) {
+                if (!neighbor.isActive()) {
+                    neighbor.setActive(true);
+                    activeCells.add(neighbor);
                 }
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("lool");
         }
     }
 
