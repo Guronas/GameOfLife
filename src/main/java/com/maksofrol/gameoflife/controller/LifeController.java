@@ -25,8 +25,8 @@
 package com.maksofrol.gameoflife.controller;
 
 import com.maksofrol.gameoflife.components.Cell;
-import com.maksofrol.gameoflife.forms.FieldFrame;
 
+import java.awt.*;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -36,19 +36,10 @@ import java.util.concurrent.*;
 public class LifeController {
     private static volatile LifeController instance;
 
-    private FieldFrame form;
-    public static final int INIT_STATUS = 0;
-    public static final int STARTED_STATUS = 1;
-    public static final int STOPPED_STATUS = 2;
-    public static final int REDRAWED_STATUS = 3;
-    private int status;
-
-
     private final Cell[] cells = new Cell[251_001];
     private final CopyOnWriteArrayList<Cell> activeCells = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<Cell> tempActiveCells = new CopyOnWriteArrayList<>();
-    private final ExecutorService evalExecutor;
-    private final ExecutorService drawExecutor;
+    private CopyOnWriteArrayList<Point> tempActiveCells = new CopyOnWriteArrayList<>();
+    private final ExecutorService executor;
 
     private LifeController() {
         for (int i = 0, index = 0; i <= 500; i++) {
@@ -60,14 +51,12 @@ public class LifeController {
             cell.setNeighbors();
         }
 
-        evalExecutor = new ThreadPoolExecutor(50, 200, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        drawExecutor = new ThreadPoolExecutor(5, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        status = INIT_STATUS;
+        executor = new ThreadPoolExecutor(5000, 10000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
         instance = this;
     }
 
-    public static LifeController getInstance(){
+    public static LifeController getInstance() {
         LifeController localInstance = instance;
         if (localInstance == null) {
             synchronized (LifeController.class) {
@@ -84,19 +73,11 @@ public class LifeController {
         return activeCells;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
     public Cell[] getCells() {
         return cells;
     }
 
-    public List<Cell> getTempActiveCells() {
+    public List<Point> getTempActiveCells() {
         return tempActiveCells;
     }
 
@@ -132,8 +113,15 @@ public class LifeController {
     }
 
     public void checkAndRedraw() throws InterruptedException {
-        evalExecutor.invokeAll(activeCells);
+        executor.invokeAll(activeCells);
+        activeCells.forEach(cell -> {
+            cell.setActive(false);
+            cell.setLivingState(false);
+        });
         activeCells.clear();
-        activeCells.addAll(tempActiveCells);
+        tempActiveCells.forEach(point -> {
+            addAliveCell(point.x, point.y);
+        });
+        tempActiveCells.clear();
     }
 }

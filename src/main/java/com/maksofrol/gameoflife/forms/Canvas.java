@@ -24,11 +24,33 @@
 
 package com.maksofrol.gameoflife.forms;
 
+import com.maksofrol.gameoflife.controller.LifeController;
+
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * TO DO
  */
 public class Canvas extends JPanel {
+    private final LifeController controller = LifeController.getInstance();
+
+    public Canvas(int x, int y, int weight, int height) {
+        setBounds(x, y, weight, height);
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createEtchedBorder());
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        controller.getActiveCells().forEach(cell -> {
+            if (cell.isAlive()) {
+                int x = cell.getXCoordinate() * 2 + 2;
+                int y = cell.getYCoordinate() * 2 + 2;
+                g.drawRect(x, y, 1, 1);
+            }
+        });
+    }
 
 }

@@ -26,13 +26,14 @@ package com.maksofrol.gameoflife.components;
 
 import com.maksofrol.gameoflife.controller.LifeController;
 
+import java.awt.*;
 import java.util.concurrent.Callable;
 
 /**
  * TO DO
  */
 
-public class Cell implements Callable<Boolean>, Cloneable {
+public class Cell implements Callable<Boolean> {
     private final int xCoordinate;
     private final int yCoordinate;
     private boolean livingState;
@@ -63,7 +64,7 @@ public class Cell implements Callable<Boolean>, Cloneable {
         return xCoordinate;
     }
 
-    public int getYCoordinate(){
+    public int getYCoordinate() {
         return yCoordinate;
     }
 
@@ -88,22 +89,15 @@ public class Cell implements Callable<Boolean>, Cloneable {
     }
 
     public Boolean call() {
-        Cell clone;
-        try {
-            clone = clone();
-            int neighborAliveCount = 0;
-            for (Cell neighbor : neighbors) {
-                if (neighbor.isAlive()) neighborAliveCount++;
-                if (neighborAliveCount == 4) break;
-            }
-            if (isAlive() && (neighborAliveCount < 2 || neighborAliveCount > 3)) {
-                clone.setLivingState(false);
-            } else if (!isAlive() && neighborAliveCount == 3){
-                clone.setLivingState(true);
-            }
-            controller.getTempActiveCells().add(clone);
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        Point point;
+        point = new Point(xCoordinate, yCoordinate);
+        int neighborAliveCount = 0;
+        for (Cell neighbor : neighbors) {
+            if (neighbor.isAlive()) neighborAliveCount++;
+            if (neighborAliveCount == 4) break;
+        }
+        if ((!isAlive() && neighborAliveCount == 3) || (isAlive() && (neighborAliveCount == 2 || neighborAliveCount == 3))) {
+            controller.getTempActiveCells().add(point);
         }
         return true;
     }
@@ -115,12 +109,6 @@ public class Cell implements Callable<Boolean>, Cloneable {
             return 0;
         }
         return n;
-    }
-
-    @Override
-    public Cell clone() throws CloneNotSupportedException{
-        Cell clone = (Cell) super.clone();
-        return clone;
     }
 
     @Override

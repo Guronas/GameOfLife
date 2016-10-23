@@ -31,7 +31,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
@@ -50,16 +49,14 @@ public class FieldPanel extends JPanel {
     private final JLabel xyLabel;
     private final ListenersFactory factory = new ListenersFactory();
     private final LifeController controller;
+    private final Timer startGame;
 
     public FieldPanel(JFrame rootFrame) {
         controller = LifeController.getInstance();
         this.rootFrame = rootFrame;
         setLayout(null);
 
-        field = new Canvas();
-        field.setBounds(0, 0, 1002, 1002);
-        field.setBackground(Color.WHITE);
-        field.setBorder(BorderFactory.createEtchedBorder());
+        field = new Canvas(0, 0, 1006, 1006);
 
         addB = new JButton();
         startB = new JButton();
@@ -94,6 +91,8 @@ public class FieldPanel extends JPanel {
         xyLabel.setFont(new Font("Verdana", Font.PLAIN, 12));
         xyLabel.setText("X:          Y:");
 
+        startGame = new Timer(50, factory.getTimerListener());
+
         add(field);
         add(addB);
         add(clearB);
@@ -123,24 +122,75 @@ public class FieldPanel extends JPanel {
     private void init() {
         textLimit(xText, 3, "1234567890");
         textLimit(yText, 3, "1234567890");
+        stopB.setEnabled(false);
 
         addB.addActionListener(factory.getAddListener());
+        exitB.addActionListener(factory.getExitListener());
+        clearB.addActionListener(factory.getClearFListener());
+        startB.addActionListener(factory.getStartListener());
+        stopB.addActionListener(factory.getStopListener());
     }
 
     private class ListenersFactory {
 
-        private ActionListener getAddListener() {
-            return new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String x = xText.getText();
-                    String y = yText.getText();
-                    if (x.equals("") || y.equals("") || Integer.parseInt(x) > 500 || Integer.parseInt(y) > 500) {
-                        JOptionPane.showMessageDialog(rootFrame, "Wrong parameters. Please choose coordinates from 0 to 500.");
-                        return;
-                    }
-                    controller.addAliveCell(Integer.parseInt(x), Integer.parseInt(y));
+        private  ActionListener getTimerListener(){
+            return e -> {
+                try {
+                    controller.checkAndRedraw();
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
                 }
+                field.repaint();
+            };
+        }
+
+        private ActionListener getAddListener() {
+            return e -> {
+                String x1 = xText.getText();
+                String y1 = yText.getText();
+                if (x1.equals("") || y1.equals("") || Integer.parseInt(x1) > 500 || Integer.parseInt(y1) > 500) {
+                    JOptionPane.showMessageDialog(rootFrame, "Wrong parameters. Please choose coordinates from 0 to 500.");
+                    return;
+                }
+                controller.addAliveCell(Integer.parseInt(x1), Integer.parseInt(y1));
+                field.repaint();
+            };
+        }
+
+        private ActionListener getExitListener() {
+            return e -> {
+                System.exit(0);
+            };
+        }
+
+        private ActionListener getClearFListener() {
+            return e -> {
+                controller.clearActiveCells();
+                field.repaint();
+            };
+        }
+
+        private ActionListener getStartListener() {
+            return e -> {
+                xText.setEnabled(false);
+                yText.setEnabled(false);
+                addB.setEnabled(false);
+                clearB.setEnabled(false);
+                startB.setEnabled(false);
+                stopB.setEnabled(true);
+                startGame.start();
+            };
+        }
+
+        private ActionListener getStopListener() {
+            return e -> {
+                startGame.stop();
+                xText.setEnabled(true);
+                yText.setEnabled(true);
+                addB.setEnabled(true);
+                clearB.setEnabled(true);
+                stopB.setEnabled(false);
+                startB.setEnabled(true);
             };
         }
     }
