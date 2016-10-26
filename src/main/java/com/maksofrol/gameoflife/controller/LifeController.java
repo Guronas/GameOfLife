@@ -27,7 +27,7 @@ package com.maksofrol.gameoflife.controller;
 import com.maksofrol.gameoflife.components.Cell;
 
 import java.awt.*;
-import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -37,8 +37,8 @@ public class LifeController {
     private static volatile LifeController instance;
 
     private final Cell[] cells = new Cell[251_001];
-    private final CopyOnWriteArrayList<Cell> activeCells = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<Point> tempActiveCells = new CopyOnWriteArrayList<>();
+    private final ConcurrentLinkedQueue<Cell> activeCells = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Point> tempActiveCells = new ConcurrentLinkedQueue<>();
     private final ExecutorService executor;
 
     private LifeController() {
@@ -51,7 +51,7 @@ public class LifeController {
             cell.setNeighbors();
         }
 
-        executor = new ThreadPoolExecutor(5000, 10000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        executor = new ThreadPoolExecutor(5000, 5000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(251_001));
 
         instance = this;
     }
@@ -69,7 +69,7 @@ public class LifeController {
         return localInstance;
     }
 
-    public CopyOnWriteArrayList<Cell> getActiveCells() {
+    public ConcurrentLinkedQueue<Cell> getActiveCells() {
         return activeCells;
     }
 
@@ -77,7 +77,7 @@ public class LifeController {
         return cells;
     }
 
-    public List<Point> getTempActiveCells() {
+    public Queue<Point> getTempActiveCells() {
         return tempActiveCells;
     }
 
@@ -89,12 +89,12 @@ public class LifeController {
 
             if (!mainCell.isActive()) {
                 mainCell.setActive(true);
-                activeCells.add(mainCell);
+                activeCells.offer(mainCell);
             }
             for (Cell neighbor : mainCell.getNeighbors()) {
                 if (!neighbor.isActive()) {
                     neighbor.setActive(true);
-                    activeCells.add(neighbor);
+                    activeCells.offer(neighbor);
                 }
             }
         }

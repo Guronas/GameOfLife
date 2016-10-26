@@ -97,7 +97,7 @@ public class Cell implements Callable<Boolean> {
             if (neighborAliveCount == 4) break;
         }
         if ((!isAlive() && neighborAliveCount == 3) || (isAlive() && (neighborAliveCount == 2 || neighborAliveCount == 3))) {
-            controller.getTempActiveCells().add(point);
+            controller.getTempActiveCells().offer(point);
         }
         return true;
     }

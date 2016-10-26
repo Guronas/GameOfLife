@@ -101,7 +101,7 @@ public class FieldPanel extends JPanel {
         version.setFont(new Font("Verdana", Font.PLAIN, 10));
         version.setEnabled(false);
 
-        startGame = new Timer(150, factory.getTimerListener());
+        startGame = new Timer(50, factory.getTimerListener());
 
         init();
     }
