@@ -101,7 +101,7 @@ public class FieldPanel extends JPanel {
         version.setFont(new Font("Verdana", Font.PLAIN, 10));
         version.setEnabled(false);
 
-        startGame = new Timer(50, factory.getTimerListener());
+        startGame = new Timer(10, factory.getTimerListener());
 
         init();
     }
@@ -219,7 +219,6 @@ public class FieldPanel extends JPanel {
 
                 @Override
                 public void mouseMoved(MouseEvent e) {
-
                 }
             };
         }
@@ -228,7 +227,6 @@ public class FieldPanel extends JPanel {
             return new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-
                 }
 
                 @Override
@@ -241,17 +239,14 @@ public class FieldPanel extends JPanel {
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-
                 }
 
                 @Override
                 public void mouseEntered(MouseEvent e) {
-
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-
                 }
             };
         }

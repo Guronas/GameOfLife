@@ -40,24 +40,14 @@ public class Cell implements Callable<Boolean> {
     private boolean active;
     private final Cell[] neighbors = new Cell[8];
     private final LifeController controller;
+    private int neighborAliveCount;
+    private final Point point;
 
     public Cell(int x, int y, LifeController controller) {
         this.xCoordinate = x;
         this.yCoordinate = y;
         this.controller = controller;
-    }
-
-    public void setNeighbors() {
-        for (int i = xCoordinate - 1, index = 0; i <= xCoordinate + 1; i++) {
-            int iX = checkBorders(i);
-            for (int j = yCoordinate - 1; j <= yCoordinate + 1; j++) {
-                int jX = checkBorders(j);
-                if (!(i == xCoordinate && j == yCoordinate)) {
-                    neighbors[index] = controller.getCells()[iX * 501 + jX];
-                    index++;
-                }
-            }
-        }
+        point = new Point(x, y);
     }
 
     public int getXCoordinate() {
@@ -88,10 +78,21 @@ public class Cell implements Callable<Boolean> {
         return neighbors;
     }
 
+    public void setNeighbors() {
+        for (int i = xCoordinate - 1, index = 0; i <= xCoordinate + 1; i++) {
+            int iX = checkBorders(i);
+            for (int j = yCoordinate - 1; j <= yCoordinate + 1; j++) {
+                int jX = checkBorders(j);
+                if (!(i == xCoordinate && j == yCoordinate)) {
+                    neighbors[index] = controller.getCells()[iX * 501 + jX];
+                    index++;
+                }
+            }
+        }
+    }
+
     public Boolean call() {
-        Point point;
-        point = new Point(xCoordinate, yCoordinate);
-        int neighborAliveCount = 0;
+        neighborAliveCount = 0;
         for (Cell neighbor : neighbors) {
             if (neighbor.isAlive()) neighborAliveCount++;
             if (neighborAliveCount == 4) break;
@@ -112,14 +113,20 @@ public class Cell implements Callable<Boolean> {
     }
 
     @Override
-    public int hashCode() {
-        int p = 31765;
-        int q = 31764;
-        return (p * xCoordinate) + (q * yCoordinate);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Cell cell = (Cell) o;
+
+        return xCoordinate == cell.xCoordinate && yCoordinate == cell.yCoordinate;
+
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Cell && this.hashCode() == obj.hashCode();
+    public int hashCode() {
+        int result = xCoordinate;
+        result = 31 * result + yCoordinate;
+        return result;
     }
 }

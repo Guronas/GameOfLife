@@ -51,7 +51,7 @@ public class LifeController {
             cell.setNeighbors();
         }
 
-        executor = new ThreadPoolExecutor(5000, 5000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(251_001));
+        executor = new ThreadPoolExecutor(10000, 10000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(251_001));
 
         instance = this;
     }
@@ -101,7 +101,7 @@ public class LifeController {
     }
 
     public void clearActiveCells() {
-        activeCells.forEach(cell -> {
+        activeCells.parallelStream().forEach(cell -> {
             cell.setActive(false);
             cell.setLivingState(false);
         });
@@ -110,11 +110,7 @@ public class LifeController {
 
     public void checkAndRedraw() throws InterruptedException {
         executor.invokeAll(activeCells);
-        activeCells.forEach(cell -> {
-            cell.setActive(false);
-            cell.setLivingState(false);
-        });
-        activeCells.clear();
+        clearActiveCells();
         tempActiveCells.forEach(point -> {
             addAliveCell(point.x, point.y);
         });
