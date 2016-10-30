@@ -47,6 +47,7 @@ public class FieldPanel extends JPanel {
     private final JButton stopB;
     private final JButton exitB;
     private final JButton clearB;
+    private final JButton randomizeB;
     private final JTextField xText;
     private final JTextField yText;
     private final JLabel xyLabel;
@@ -54,6 +55,11 @@ public class FieldPanel extends JPanel {
     private final LifeController controller;
     private final Timer startGame;
     private final JLabel version;
+    private final JLabel popCount;
+    private final JLabel count;
+    private final JLabel seedLabel;
+    private final JTextField seedText;
+
     private long delay;
 
     public FieldPanel(JFrame rootFrame) {
@@ -68,6 +74,7 @@ public class FieldPanel extends JPanel {
         stopB = new JButton();
         exitB = new JButton();
         clearB = new JButton();
+        randomizeB = new JButton();
         addB.setText("Add cell");
         addB.setBounds(1040, 150, 110, 30);
         clearB.setFont(new Font("Verdana", Font.PLAIN, 12));
@@ -83,6 +90,9 @@ public class FieldPanel extends JPanel {
         exitB.setText("Exit");
         exitB.setBounds(1040, 600, 110, 40);
         exitB.setFont(new Font("Verdana", Font.PLAIN, 12));
+        randomizeB.setText("Randomize!");
+        randomizeB.setBounds(1040, 480, 110, 40);
+        randomizeB.setFont(new Font("Verdana", Font.PLAIN, 12));
 
         xText = new JTextField();
         xText.setBounds(1040, 120, 50, 20);
@@ -101,6 +111,26 @@ public class FieldPanel extends JPanel {
         version.setBounds(1100, 950, 100, 50);
         version.setFont(new Font("Verdana", Font.PLAIN, 10));
         version.setEnabled(false);
+
+        popCount = new JLabel();
+        popCount.setText("Population:");
+        popCount.setBounds(1040, 240, 110, 40);
+        popCount.setBorder(BorderFactory.createEtchedBorder());
+        popCount.setFont(new Font("Verdana", Font.PLAIN, 11));
+
+        count = new JLabel();
+        count.setText("0");
+        count.setBounds(1108, 240, 50, 40);
+        count.setFont(new Font("Verdana", Font.PLAIN, 11));
+
+        seedLabel = new JLabel();
+        seedLabel.setText("Seed:");
+        seedLabel.setBounds(1040, 440, 40, 40);
+        seedLabel.setFont(new Font("Verdana", Font.PLAIN, 11));
+
+        seedText = new JTextField();
+        seedText.setBounds(1080, 450, 60, 20);
+        seedText.setFont(new Font("Verdana", Font.PLAIN, 12));
 
         startGame = new Timer(0, factory.getTimerListener());
 
@@ -127,13 +157,19 @@ public class FieldPanel extends JPanel {
         add(startB);
         add(stopB);
         add(exitB);
+        add(randomizeB);
         add(xText);
         add(yText);
         add(xyLabel);
         add(version);
+        add(popCount);
+        add(count);
+        add(seedLabel);
+        add(seedText);
 
         textLimit(xText, 3, "1234567890");
         textLimit(yText, 3, "1234567890");
+        textLimit(seedText, 6, "1234567890");
         stopB.setEnabled(false);
 
         addB.addActionListener(factory.getAddListener());
@@ -141,6 +177,7 @@ public class FieldPanel extends JPanel {
         clearB.addActionListener(factory.getClearFListener());
         startB.addActionListener(factory.getStartListener());
         stopB.addActionListener(factory.getStopListener());
+        randomizeB.addActionListener(factory.getRandomizerListener());
         field.addMouseListener(factory.getTouchListener());
         field.addMouseMotionListener(factory.getMouseMListener());
     }
@@ -156,6 +193,7 @@ public class FieldPanel extends JPanel {
                     e1.printStackTrace();
                 }
                 field.repaint();
+                count.setText(Long.toString(controller.getPopulationCount()));
                 delay = System.currentTimeMillis() - delay;
                 delay = delay > 50 ? 0 : 50 - delay;
                 startGame.setDelay((int) delay);
@@ -185,6 +223,7 @@ public class FieldPanel extends JPanel {
             return e -> {
                 controller.clearActiveCells();
                 field.repaint();
+                controller.setPopulationCount(0);
             };
         }
 
@@ -209,6 +248,20 @@ public class FieldPanel extends JPanel {
                 clearB.setEnabled(true);
                 stopB.setEnabled(false);
                 startB.setEnabled(true);
+            };
+        }
+
+        private ActionListener getRandomizerListener() {
+            return e -> {
+                controller.clearActiveCells();
+                String seed = seedText.getText();
+                if (seed.equals("")) {
+                    controller.generateField();
+                } else {
+                    controller.generateField(Long.parseLong(seed));
+                }
+                repaint();
+                controller.setPopulationCount(0);
             };
         }
 

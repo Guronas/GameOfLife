@@ -28,6 +28,7 @@ import com.maksofrol.gameoflife.components.Cell;
 
 import java.awt.*;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.*;
 
 /**
@@ -40,6 +41,8 @@ public class LifeController {
     private final ConcurrentLinkedQueue<Cell> activeCells = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Point> tempActiveCells = new ConcurrentLinkedQueue<>();
     private final ExecutorService executor;
+    private long populationCount;
+    private Random randomizer = new Random();
 
     private LifeController() {
         for (int i = 0, index = 0; i <= 500; i++) {
@@ -78,6 +81,14 @@ public class LifeController {
         return tempActiveCells;
     }
 
+    public void setPopulationCount(long populationCount) {
+        this.populationCount = populationCount;
+    }
+
+    public long getPopulationCount() {
+        return populationCount;
+    }
+
     public static LifeController getInstance() {
         LifeController localInstance = instance;
         if (localInstance == null) {
@@ -91,8 +102,7 @@ public class LifeController {
         return localInstance;
     }
 
-    public void addAliveCell(int x, int y) {
-        int index = x * 501 + y;
+    public void addAliveCell(int index) {
         if (!cells[index].isAlive()) {
             cells[index].setLivingState(true);
 
@@ -107,6 +117,11 @@ public class LifeController {
                 }
             }
         }
+    }
+
+    public void addAliveCell(int x, int y) {
+        int index = x * 501 + y;
+        addAliveCell(index);
     }
 
     public void clearActiveCells() {
@@ -124,5 +139,21 @@ public class LifeController {
             addAliveCell(point.x, point.y);
         });
         tempActiveCells.clear();
+        populationCount++;
+    }
+
+    public void generateField() {
+        for (int i = 0; i < 251_001; i++) {
+            if (randomizer.nextInt(10) > 7) {
+                if (randomizer.nextBoolean()) {
+                    addAliveCell(i);
+                }
+            }
+        }
+    }
+
+    public void generateField(long seed) {
+        randomizer.setSeed(seed);
+        generateField();
     }
 }
