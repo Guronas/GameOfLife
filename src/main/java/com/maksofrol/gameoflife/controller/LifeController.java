@@ -27,7 +27,7 @@ package com.maksofrol.gameoflife.controller;
 import com.maksofrol.gameoflife.components.Cell;
 
 import java.awt.*;
-import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -37,8 +37,8 @@ public class LifeController {
     private static volatile LifeController instance;
 
     private final Cell[] cells = new Cell[251_001];
-    private final CopyOnWriteArrayList<Cell> activeCells = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<Point> tempActiveCells = new CopyOnWriteArrayList<>();
+    private final ConcurrentLinkedQueue<Cell> activeCells = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Point> tempActiveCells = new ConcurrentLinkedQueue<>();
     private final ExecutorService executor;
 
     private LifeController() {
@@ -51,9 +51,31 @@ public class LifeController {
             cell.setNeighbors();
         }
 
-        executor = new ThreadPoolExecutor(5000, 10000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        executor = new ThreadPoolExecutor(10_000, 10_000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(251_001));
+        for (Cell cell : cells) {
+            activeCells.offer(cell);
+        }
+        try {
+            executor.invokeAll(activeCells);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            activeCells.clear();
+        }
 
         instance = this;
+    }
+
+    public ConcurrentLinkedQueue<Cell> getActiveCells() {
+        return activeCells;
+    }
+
+    public Cell[] getCells() {
+        return cells;
+    }
+
+    public Queue<Point> getTempActiveCells() {
+        return tempActiveCells;
     }
 
     public static LifeController getInstance() {
@@ -69,32 +91,19 @@ public class LifeController {
         return localInstance;
     }
 
-    public CopyOnWriteArrayList<Cell> getActiveCells() {
-        return activeCells;
-    }
-
-    public Cell[] getCells() {
-        return cells;
-    }
-
-    public List<Point> getTempActiveCells() {
-        return tempActiveCells;
-    }
-
     public void addAliveCell(int x, int y) {
         int index = x * 501 + y;
-        Cell mainCell = cells[index];
-        if (!mainCell.isAlive()) {
-            mainCell.setLivingState(true);
+        if (!cells[index].isAlive()) {
+            cells[index].setLivingState(true);
 
-            if (!mainCell.isActive()) {
-                mainCell.setActive(true);
-                activeCells.add(mainCell);
+            if (!cells[index].isActive()) {
+                cells[index].setActive(true);
+                activeCells.offer(cells[index]);
             }
-            for (Cell neighbor : mainCell.getNeighbors()) {
+            for (Cell neighbor : cells[index].getNeighbors()) {
                 if (!neighbor.isActive()) {
                     neighbor.setActive(true);
-                    activeCells.add(neighbor);
+                    activeCells.offer(neighbor);
                 }
             }
         }
@@ -108,13 +117,9 @@ public class LifeController {
         activeCells.clear();
     }
 
-    public void checkAndRedraw() throws InterruptedException {
+    public void checkCells() throws InterruptedException {
         executor.invokeAll(activeCells);
-        activeCells.forEach(cell -> {
-            cell.setActive(false);
-            cell.setLivingState(false);
-        });
-        activeCells.clear();
+        clearActiveCells();
         tempActiveCells.forEach(point -> {
             addAliveCell(point.x, point.y);
         });
