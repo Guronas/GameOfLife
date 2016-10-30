@@ -107,7 +107,7 @@ public class FieldPanel extends JPanel {
         xyLabel.setText("X:          Y:");
 
         version = new JLabel();
-        version.setText("version 0.4.2");
+        version.setText("version 0.5.0");
         version.setBounds(1100, 950, 100, 50);
         version.setFont(new Font("Verdana", Font.PLAIN, 10));
         version.setEnabled(false);
