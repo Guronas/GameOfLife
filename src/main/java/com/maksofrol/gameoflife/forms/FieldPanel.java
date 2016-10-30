@@ -223,7 +223,7 @@ public class FieldPanel extends JPanel {
             return e -> {
                 controller.clearActiveCells();
                 field.repaint();
-                controller.setPopulationCount(0);
+                controller.setPopulationCount(0L);
             };
         }
 
@@ -261,7 +261,7 @@ public class FieldPanel extends JPanel {
                     controller.generateField(Long.parseLong(seed));
                 }
                 repaint();
-                controller.setPopulationCount(0);
+                controller.setPopulationCount(0L);
             };
         }
 

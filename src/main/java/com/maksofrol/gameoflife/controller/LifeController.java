@@ -85,6 +85,10 @@ public class LifeController {
         this.populationCount = populationCount;
     }
 
+    public void incPopCount(){
+        populationCount++;
+    }
+
     public long getPopulationCount() {
         return populationCount;
     }
@@ -133,13 +137,13 @@ public class LifeController {
     }
 
     public void checkCells() throws InterruptedException {
+        populationCount = 0;
         executor.invokeAll(activeCells);
         clearActiveCells();
         tempActiveCells.forEach(point -> {
             addAliveCell(point.x, point.y);
         });
         tempActiveCells.clear();
-        populationCount++;
     }
 
     public void generateField() {
