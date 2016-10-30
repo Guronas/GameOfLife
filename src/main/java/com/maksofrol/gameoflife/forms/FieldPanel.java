@@ -54,6 +54,7 @@ public class FieldPanel extends JPanel {
     private final LifeController controller;
     private final Timer startGame;
     private final JLabel version;
+    private long delay;
 
     public FieldPanel(JFrame rootFrame) {
         controller = LifeController.getInstance();
@@ -101,7 +102,7 @@ public class FieldPanel extends JPanel {
         version.setFont(new Font("Verdana", Font.PLAIN, 10));
         version.setEnabled(false);
 
-        startGame = new Timer(10, factory.getTimerListener());
+        startGame = new Timer(0, factory.getTimerListener());
 
         init();
     }
@@ -148,12 +149,16 @@ public class FieldPanel extends JPanel {
 
         private ActionListener getTimerListener() {
             return e -> {
+                delay = System.currentTimeMillis();
                 try {
-                    controller.checkAndRedraw();
+                    controller.checkCells();
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
                 field.repaint();
+                delay = System.currentTimeMillis() - delay;
+                delay = delay > 50 ? 0 : 50 - delay;
+                startGame.setDelay((int) delay);
             };
         }
 
@@ -213,7 +218,9 @@ public class FieldPanel extends JPanel {
                 public void mouseDragged(MouseEvent e) {
                     int x = e.getX() / 2 - 1;
                     int y = e.getY() / 2 - 1;
-                    controller.addAliveCell(x, y);
+                    if (x >= 0 && x <= 500 && y >= 0 && y <= 500) {
+                        controller.addAliveCell(x, y);
+                    }
                     field.repaint();
                 }
 

@@ -51,9 +51,31 @@ public class LifeController {
             cell.setNeighbors();
         }
 
-        executor = new ThreadPoolExecutor(10000, 10000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(251_001));
+        executor = new ThreadPoolExecutor(10_000, 10_000, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(251_001));
+        for (Cell cell : cells) {
+            activeCells.offer(cell);
+        }
+        try {
+            executor.invokeAll(activeCells);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            activeCells.clear();
+        }
 
         instance = this;
+    }
+
+    public ConcurrentLinkedQueue<Cell> getActiveCells() {
+        return activeCells;
+    }
+
+    public Cell[] getCells() {
+        return cells;
+    }
+
+    public Queue<Point> getTempActiveCells() {
+        return tempActiveCells;
     }
 
     public static LifeController getInstance() {
@@ -69,29 +91,16 @@ public class LifeController {
         return localInstance;
     }
 
-    public ConcurrentLinkedQueue<Cell> getActiveCells() {
-        return activeCells;
-    }
-
-    public Cell[] getCells() {
-        return cells;
-    }
-
-    public Queue<Point> getTempActiveCells() {
-        return tempActiveCells;
-    }
-
     public void addAliveCell(int x, int y) {
         int index = x * 501 + y;
-        Cell mainCell = cells[index];
-        if (!mainCell.isAlive()) {
-            mainCell.setLivingState(true);
+        if (!cells[index].isAlive()) {
+            cells[index].setLivingState(true);
 
-            if (!mainCell.isActive()) {
-                mainCell.setActive(true);
-                activeCells.offer(mainCell);
+            if (!cells[index].isActive()) {
+                cells[index].setActive(true);
+                activeCells.offer(cells[index]);
             }
-            for (Cell neighbor : mainCell.getNeighbors()) {
+            for (Cell neighbor : cells[index].getNeighbors()) {
                 if (!neighbor.isActive()) {
                     neighbor.setActive(true);
                     activeCells.offer(neighbor);
@@ -101,14 +110,14 @@ public class LifeController {
     }
 
     public void clearActiveCells() {
-        activeCells.parallelStream().forEach(cell -> {
+        activeCells.forEach(cell -> {
             cell.setActive(false);
             cell.setLivingState(false);
         });
         activeCells.clear();
     }
 
-    public void checkAndRedraw() throws InterruptedException {
+    public void checkCells() throws InterruptedException {
         executor.invokeAll(activeCells);
         clearActiveCells();
         tempActiveCells.forEach(point -> {
