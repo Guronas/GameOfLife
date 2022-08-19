@@ -1,2 +1,2 @@
 # GameOfLife
-"Game of Life" (John Horton Conway) computer realization.
+"Game of Life" (John Horton Conway) computer realization
